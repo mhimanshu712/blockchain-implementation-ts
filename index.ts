@@ -41,9 +41,16 @@ class Chain {
         return this.chain[this.chain.length -1];
     }
 
-    addBlock(transaction: Transaction, senderPublicKey: string, signature: string){
-        const newBlock = new Block(this.lastBlock.hash, transaction);
-        this.chain.push(newBlock);
+    addBlock(transaction: Transaction, senderPublicKey: string, signature: Buffer){
+        const verifier = crypto.createVerify('SHA256');
+        verifier.update(transaction.toString());
+
+        const isValid = verifier.verify(senderPublicKey, signature);
+
+        if(isValid){
+            const newBlock = new Block(this.lastBlock.hash, transaction);
+            this.chain.push(newBlock);
+        }
     }
 }
 
@@ -62,5 +69,14 @@ class Wallet {
         this.publickey = keypair.publicKey;
     }
 
-    
+    sendMoney(amount: number, payeePublicKey: string){
+        const transaction = new Transaction(amount, this.publickey, payeePublicKey);
+
+        const sign = crypto.createSign('SHA256');
+        sign.update(transaction.toString()).end();
+
+        const signature = sign.sign(this.privatekey);
+        Chain.instance.addBlock(transaction, this.publickey, signature);
+    }
+
 }
