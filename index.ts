@@ -110,6 +110,7 @@ const alice = new Wallet();
 him.sendMoney(50,bob.publickey);
 bob.sendMoney(23,alice.publickey);
 alice.sendMoney(5,bob.publickey);
+bob.sendMoney(10,alice.publickey);
 
 
 console.log(Chain.instance);
